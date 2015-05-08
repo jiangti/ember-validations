@@ -11,3 +11,4 @@ require("ember-validations/validators/numericality");
 require("ember-validations/validators/length");
 require("ember-validations/validators/format");
 require("ember-validations/validators/match");
+require("ember-validations/validators/reqwhen");

@@ -61,7 +61,7 @@ Ember.ValidationError = Ember.Object.extend(/** @scope Ember.ValidationError.pro
     }
 
     return message;
-  }).property('key', 'customMessage').cacheable()
+  }).property('key', 'customMessage')
 });
 
 Ember.ValidationError.reopenClass(/** @scope Ember.ValidationError */{
@@ -149,7 +149,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
    */
   allKeys: Ember.computed(function() {
     return this._allErrorsData('keys');
-  }).property('length').cacheable(),
+  }).property('length'),
 
   /**
      The array which contains each error paths and messages. It works exactly like `allKeys` property.
@@ -162,7 +162,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
    */
   allMessages: Ember.computed(function() {
     return this._allErrorsData('messages');
-  }).property('length').cacheable(),
+  }).property('length'),
 
 
   /**
@@ -181,7 +181,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
       msg += m[1];
       return msg;
     });
-  }).property('allMessages').cacheable(),
+  }).property('allMessages'),
 
   /**
      The array which contains each direct error keys.
@@ -198,7 +198,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
     var content = get(this, '_content'), keys = Ember.A();
     content.forEach(function(error) { keys.push(error.get('key')); });
     return keys;
-  }).property('length').cacheable(),
+  }).property('length'),
 
   /**
      The array which contains each direct error messages.
@@ -213,7 +213,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
     var content = get(this, '_content'), messages = Ember.A();
     content.forEach(function(error) { messages.push(error.get('message')); });
     return messages;
-  }).property('length').cacheable(),
+  }).property('length'),
 
   /**
      The error count, including nested errors.
@@ -228,7 +228,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
     length += content.length;
     errors.forEach(function(nestedErrorsPath, nestedErrors) { length += get(nestedErrors, 'length'); });
     return length;
-  }).cacheable(),
+  }),
 
   /** @private */
   unknownProperty: function(key) {
@@ -502,7 +502,7 @@ Ember.Validations = Ember.Mixin.create(/**@scope Ember.Validations.prototype */{
    */
   isValid: Ember.computed(function() {
     return get(this, 'validationErrors.length') === 0;
-  }).property('validationErrors.length').cacheable(),
+  }).property('validationErrors.length'),
 
   clear: function() {
         Ember.Logger.error('This function is deprecated, please use clearErrors instead.');
@@ -1032,6 +1032,23 @@ Ember.Validators.MatchValidator = Ember.Validator.extend({
 
 });
 
+})();
+
+
+
+(function() {
+Ember.Validators.ReqwhenValidator = Ember.Validator.extend({
+
+	_validate: function(obj, attr, value) {
+		var options = get(this, 'options') || {};
+		if (options.property) {
+
+			if (obj.get(options.property) && Em.isEmpty(value)) {
+				obj.get('validationErrors').add(attr, 'blank');
+			}
+		}
+	}
+});
 })();
 
 
