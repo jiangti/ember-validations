@@ -1067,6 +1067,102 @@ Ember.Validators.NameValidator = Ember.Validator.extend({
 
 
 (function() {
+Ember.ValidationError.addMessage('alnum', "can only be alphanumeric");
+
+Ember.Validators.AlnumValidator = Ember.Validator.extend({
+
+    _validate: function (obj, attr, value) {
+
+        var pattern = /[A-Za-z0-9]+/;
+        var err = validate({val: value}, {val: {format: pattern}});
+        if (err != undefined) {
+            obj.get('validationErrors').add(attr, "alnum");
+        }
+    }
+});
+})();
+
+
+
+(function() {
+Ember.ValidationError.addMessage('date', "must be a valid date");
+
+Ember.Validators.DateValidator = Ember.Validator.extend({
+    _validate: function (obj, attr, value) {
+
+        var err = validate({val: value}, {val: {
+            datetime: {
+                dateOnly: true
+            }
+        }});
+
+        if (err != undefined) {
+            obj.get('validationErrors').add(attr, "date", '', obj.get('validations.' + attr + '.date.message'));
+        }
+    }
+});
+
+
+
+})();
+
+
+
+(function() {
+Ember.ValidationError.addMessage('email', "must be a valid email");
+
+Ember.Validators.EmailValidator = Ember.Validator.extend({
+    _validate: function (obj, attr, value) {
+        if (!Em.isBlank(value)) {
+            value = value.toLowerCase();
+            var errors = validate({val: value}, { val: { email: true }});
+            if (errors) {
+                obj.get('validationErrors').add(attr, "email", '', obj.get('validations.' + attr + '.email.message'));
+            }
+        }   
+    }
+});
+
+})();
+
+
+
+(function() {
+Ember.ValidationError.addMessage('numeric', "only accepts numeric values");
+
+Ember.Validators.NumericValidator = Ember.Validator.extend({
+    shouldSkipValidations: function (obj, attr, value) {
+        return false;
+    },
+
+    _validate: function (obj, attr, value) {
+
+        error = validate({val: value}, {val: {numericality: true}});
+
+        if (error != undefined) {
+            obj.get('validationErrors').add(attr, "numeric");
+        }
+    }
+});
+})();
+
+
+
+(function() {
+Ember.ValidationError.addMessage('numfloat', "can only be float");
+
+Ember.Validators.NumfloatValidator = Ember.Validator.extend({
+    _validate: function (obj, attr, value) {
+        if (isNaN(value)) {
+            obj.get('validationErrors').add(attr, "numfloat", '', obj.get('validations.' + attr + '.float.message'));
+        }
+    }
+});
+})();
+
+
+
+(function() {
 
 })();
 
