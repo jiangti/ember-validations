@@ -660,7 +660,7 @@ Ember.Validator = Ember.Object.extend(/**@scope Ember.Validator.prototype */{
   */
   shouldSkipValidations: function(obj, attr, value) {
     var options = Ember.get(this, 'options');
-    if (options.allowBlank === true) {
+    if (options.allowBlank !== false) {
       return value ==="" || value === null || value === undefined;
     }
     return false;
