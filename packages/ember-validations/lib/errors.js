@@ -35,7 +35,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
    */
   allKeys: Ember.computed(function() {
     return this._allErrorsData('keys');
-  }).property('length').cacheable(),
+  }).property('length'),
 
   /**
      The array which contains each error paths and messages. It works exactly like `allKeys` property.
@@ -48,7 +48,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
    */
   allMessages: Ember.computed(function() {
     return this._allErrorsData('messages');
-  }).property('length').cacheable(),
+  }).property('length'),
 
 
   /**
@@ -67,7 +67,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
       msg += m[1];
       return msg;
     });
-  }).property('allMessages').cacheable(),
+  }).property('allMessages'),
 
   /**
      The array which contains each direct error keys.
@@ -84,7 +84,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
     var content = get(this, '_content'), keys = Ember.A();
     content.forEach(function(error) { keys.push(error.get('key')); });
     return keys;
-  }).property('length').cacheable(),
+  }).property('length'),
 
   /**
      The array which contains each direct error messages.
@@ -99,7 +99,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
     var content = get(this, '_content'), messages = Ember.A();
     content.forEach(function(error) { messages.push(error.get('message')); });
     return messages;
-  }).property('length').cacheable(),
+  }).property('length'),
 
   /**
      The error count, including nested errors.
@@ -114,7 +114,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
     length += content.length;
     errors.forEach(function(nestedErrorsPath, nestedErrors) { length += get(nestedErrors, 'length'); });
     return length;
-  }).cacheable(),
+  }),
 
   /** @private */
   unknownProperty: function(key) {

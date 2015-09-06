@@ -5,4 +5,4 @@ gem "rake-pipeline-web-filters", :git => "https://github.com/wycats/rake-pipelin
 gem "colored"
 gem "json"
 gem "uglifier", "~> 1.0.3"
-gem "ember-docs", :git =>  "https://github.com/emberjs/docs-generator.git"
+#gem "ember-docs", :git =>  "https://github.com/emberjs/docs-generator.git"

@@ -60,7 +60,7 @@ Ember.ValidationError = Ember.Object.extend(/** @scope Ember.ValidationError.pro
     }
 
     return message;
-  }).property('key', 'customMessage').cacheable()
+  }).property('key', 'customMessage')
 });
 
 Ember.ValidationError.reopenClass(/** @scope Ember.ValidationError */{
