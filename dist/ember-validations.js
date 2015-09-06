@@ -336,7 +336,7 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
     directData.forEach(function(singleData) { data.push(['', singleData]); });
 
     var nestedErrors = get(this, '_nestedErrors');
-    nestedErrors.forEach(function(path, errors) {
+    nestedErrors.forEach(function(errors, path) {
       var allErrorsDataPath = 'all' + dataName[0].toUpperCase() + dataName.slice(1);
       var allErrorsData = errors.get(allErrorsDataPath);
 
