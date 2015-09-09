@@ -1,0 +1,11 @@
+{
+  "name": "jiangti/ember-validations",
+  "version": "0.6",
+  "homepage": "https://github.com/jiangti/ember-validations",
+  "authors": [
+    "Jiangti Wan-Leong <jiangti.wan.leong@gmail.com>"
+  ],
+  "description": "Forked from Ember-Validations - An Ember.js library for handling object validations",
+  "main": "dist/ember-validations.js",
+  "license": "MIT"
+}
