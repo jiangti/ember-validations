@@ -1089,7 +1089,7 @@ Ember.Validators.PresenceValidator = Ember.Validator.extend({
   },
 
   _validate: function(obj, attr, value) {
-    var invalidValues = Ember.A([undefined, null);
+    var invalidValues = Ember.A([undefined, null]);
     if (invalidValues.contains(value) || (value.match && value.match(/^\s*$/))) {
       obj.get('validationErrors').add(attr, "blank");
       return;
