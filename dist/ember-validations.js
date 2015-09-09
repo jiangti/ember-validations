@@ -108,9 +108,6 @@ Ember.ValidationError.reopenClass(/** @scope Ember.ValidationError */{
   }
 });
 })();
-
-
-
 (function() {
 var get = Ember.get, set = Ember.set;
 
@@ -352,9 +349,6 @@ Ember.ValidationErrors = Ember.Object.extend(/** @scope Ember.ValidationErrors.p
 });
 
 })();
-
-
-
 (function() {
 var get = Ember.get, set = Ember.set;
 
@@ -521,9 +515,6 @@ Ember.Validations = Ember.Mixin.create(/**@scope Ember.Validations.prototype */{
   }
 });
 })();
-
-
-
 (function() {
 /**
    @namespace
@@ -595,9 +586,6 @@ Ember.Validators = Ember.Namespace.create(/**@scope Ember.Validators */{
   }
 });
 })();
-
-
-
 (function() {
 /**
    @class
@@ -708,54 +696,256 @@ Ember.Validator = Ember.Object.extend(/**@scope Ember.Validator.prototype */{
 });
 
 })();
-
-
-
 (function() {
-Ember.ValidationError.addMessage('blank', "can't be blank");
+Ember.ValidationError.addMessage('alnum', "can only be alphanumeric");
+
+Ember.Validators.AlnumValidator = Ember.Validator.extend({
+
+    _validate: function (obj, attr, value) {
+
+        var pattern = /[A-Za-z0-9]+/;
+        var err = validate({val: value}, {val: {format: pattern}});
+        if (err != undefined) {
+            obj.get('validationErrors').add(attr, "alnum");
+        }
+    }
+});
+})();
+(function() {
+Ember.ValidationError.addMessage('date', "must be a valid date");
+
+Ember.Validators.DateValidator = Ember.Validator.extend({
+    _validate: function (obj, attr, value) {
+
+        var err = validate({val: value}, {val: {
+            datetime: {
+                dateOnly: true
+            }
+        }});
+
+        if (err != undefined) {
+            obj.get('validationErrors').add(attr, "date", '', obj.get('validations.' + attr + '.date.message'));
+        }
+    }
+});
+
+
+
+})();
+(function() {
+Ember.ValidationError.addMessage('email', "must be a valid email");
+
+Ember.Validators.EmailValidator = Ember.Validator.extend({
+    _validate: function (obj, attr, value) {
+        if (!Em.isBlank(value)) {
+            value = value.toLowerCase();
+            var errors = validate({val: value}, { val: { email: true }});
+            if (errors) {
+                obj.get('validationErrors').add(attr, "email", '', obj.get('validations.' + attr + '.email.message'));
+            }
+        }   
+    }
+});
+
+})();
+(function() {
+var get = Ember.get;
+
+Ember.ValidationError.addMessages({
+  'invalid': "is invalid"
+});
+
 
 /**
    @class
 
-   This validator validates that the attribute is not blank (`undefined`, `null`, empty string
-   or string which contains only spaces).
+   Validates whether the attribute has (not) the supplied regexp.
 
-   It can add the error key 'blank'.
+   Options:
+
+    - `with` - The value must match this pattern
+    - `without` - The value must not match this pattern
+
+    The simplest way to use the `FormatValidator` is to set the validation to a `String`, or
+    a `RegExp`:
+
+        validations: {
+          email: {
+            format: /.+@.+\..{2,4}/
+          }
+        }
+
 
    @extends Ember.Validator
-*/
-Ember.Validators.PresenceValidator = Ember.Validator.extend({
-  /**
-    The presence validators `shouldSkipValidations` method should return false regardless of whether the `allowBlank` option is set to `true` since it would be contradictory for a PresenceValidator to allow blank values.
-     @param {Object} object
-      The object which contains the attribute that has to be validated
-     @param {String} attribute
-      The attribute path on which the validation should be done
-     @param {Object} value
-      The value of the attribute
-  */
-  shouldSkipValidations: function(obj, attr, value) {
-    return false;
-  },
-
+ */
+Ember.Validators.FormatValidator = Ember.Validator.extend({
   _validate: function(obj, attr, value) {
-    var invalidValues = Ember.A([undefined, null);
-    if (invalidValues.contains(value) || (value.match && value.match(/^\s*$/))) {
-      obj.get('validationErrors').add(attr, "blank");
-      return;
+    var options = get(this, 'options'),
+        errors = get(obj, 'validationErrors'),
+        optionValue;
+
+    if (!value || typeof value.match !== 'function') {
+      value = "";
     }
 
-    if (Em.isArray(value) && Em.isEmpty(value)) {
-    	obj.get('validationErrors').add(attr, "blank");
-    	return;
+    optionValue = this.optionValue(obj, 'with') || this.optionValue(obj, 'value');
+    if ((typeof optionValue === 'string' || optionValue instanceof RegExp) && !value.match(optionValue)) {
+      errors.add(attr, 'invalid');
+    }
+
+    optionValue = this.optionValue(obj, 'without');
+    if ((typeof optionValue === 'string' || optionValue instanceof RegExp) && value.match(optionValue)) {
+      errors.add(attr, 'invalid');
     }
   }
+
 });
 
 })();
+(function() {
+var get = Ember.get;
 
+Ember.ValidationError.addMessages({
+  'tooShortLength': "is too short (minimum @{value} characters)",
+  'tooLongLength': "is too long (maximum @{value} characters)",
+  'wrongLength': "is the wrong length (should be @{value} characters)"
+});
 
+/**
+   @class
 
+   Validates whether the attribute has the supplied length.
+
+   Options:
+
+    - `minimum` - The value must have at least this length
+    - `is` - The value must equal this length
+    - `maximum` - The value must have at most this length
+
+    When passing a number as option to the validation, it will use it as the `is` option:
+
+        validations: {
+          zipCode: {
+            length: 5
+          }
+        }
+
+    Another implementation could be:
+
+        validations: {
+          zipCode: {
+            length: {
+              is: 5
+            }
+          }
+        }
+
+   @extends Ember.Validator
+ */
+Ember.Validators.LengthValidator = Ember.Validator.extend(/** @scope Ember.Validators.LengthValidator */{
+
+  /** @private */
+  _validate: function(obj, attr, value) {
+    var options = get(this, 'options'),
+        errors = get(obj, 'validationErrors'),
+        length = value ? Ember.get(value, 'length') : 0,
+        optionValue;
+
+    optionValue = this.optionValue(obj, 'is', 'number');
+    if (optionValue === null) {
+      optionValue = this.optionValue(obj, 'value', 'number');
+    }
+
+    if (optionValue !== null) {
+      if (length !== optionValue) {
+        errors.add(attr, 'wrongLength', {value: optionValue});
+      }
+    } else {
+
+      optionValue = this.optionValue(obj, 'minimum', 'number');
+      if (optionValue !== null && length < optionValue) {
+        errors.add(attr, 'tooShortLength', {value: optionValue});
+      }
+
+      optionValue = this.optionValue(obj, 'maximum', 'number');
+      if (optionValue !== null && length > optionValue) {
+        errors.add(attr, 'tooLongLength', {value: optionValue});
+      }
+    }
+  }
+
+});
+
+})();
+(function() {
+var get = Ember.get;
+
+Ember.ValidationError.addMessages({
+  'match': "fields do not match"
+});
+
+/**
+   @class
+
+   Validates whether the property matches the other specified property.
+
+   Options:
+
+    - `property` - The other property to validate against
+
+    When passing a property as option to the validation, it will use it as the `property` option:
+
+        validations: {
+          password: {
+            property: 'confirmPassword'
+          }
+        }
+
+   @extends Ember.Validator
+ */
+Ember.Validators.MatchValidator = Ember.Validator.extend({
+    /** @private */
+    _validate: function( obj, attr, value ) {
+      var options = get(this, 'options' ) || {};
+
+      if( options.property ) {
+        if( obj.get( options.property ) !==  value ) {
+          obj.get( 'validationErrors' ).add( attr, 'match' );
+        }
+      }
+    }
+
+});
+
+})();
+(function() {
+Ember.Validators.NameValidator = Ember.Validator.extend({
+
+	_validate: function(obj, attr, value) {
+		if (/[^a-z^ ^' ^_^\-]/i.test(value)) {
+			obj.get('validationErrors').add(attr, 'invalid', '', '');
+		}
+	}
+});
+})();
+(function() {
+Ember.ValidationError.addMessage('numeric', "only accepts numeric values");
+
+Ember.Validators.NumericValidator = Ember.Validator.extend({
+    shouldSkipValidations: function (obj, attr, value) {
+        return false;
+    },
+
+    _validate: function (obj, attr, value) {
+
+        error = validate({val: value}, {val: {numericality: true}});
+
+        if (error != undefined) {
+            obj.get('validationErrors').add(attr, "numeric");
+        }
+    }
+});
+})();
 (function() {
 var get = Ember.get;
 
@@ -860,190 +1050,60 @@ Ember.Validators.NumericalityValidator = Ember.Validator.extend(/** @scope Ember
 });
 
 })();
-
-
-
 (function() {
-var get = Ember.get;
+Ember.ValidationError.addMessage('numfloat', "can only be float");
 
-Ember.ValidationError.addMessages({
-  'tooShortLength': "is too short (minimum @{value} characters)",
-  'tooLongLength': "is too long (maximum @{value} characters)",
-  'wrongLength': "is the wrong length (should be @{value} characters)"
+Ember.Validators.NumfloatValidator = Ember.Validator.extend({
+    _validate: function (obj, attr, value) {
+        if (isNaN(value)) {
+            obj.get('validationErrors').add(attr, "numfloat", '', obj.get('validations.' + attr + '.float.message'));
+        }
+    }
 });
+})();
+(function() {
+Ember.ValidationError.addMessage('blank', "can't be blank");
 
 /**
    @class
 
-   Validates whether the attribute has the supplied length.
+   This validator validates that the attribute is not blank (`undefined`, `null`, empty string
+   or string which contains only spaces).
 
-   Options:
-
-    - `minimum` - The value must have at least this length
-    - `is` - The value must equal this length
-    - `maximum` - The value must have at most this length
-
-    When passing a number as option to the validation, it will use it as the `is` option:
-
-        validations: {
-          zipCode: {
-            length: 5
-          }
-        }
-
-    Another implementation could be:
-
-        validations: {
-          zipCode: {
-            length: {
-              is: 5
-            }
-          }
-        }
+   It can add the error key 'blank'.
 
    @extends Ember.Validator
- */
-Ember.Validators.LengthValidator = Ember.Validator.extend(/** @scope Ember.Validators.LengthValidator */{
+*/
+Ember.Validators.PresenceValidator = Ember.Validator.extend({
+  /**
+    The presence validators `shouldSkipValidations` method should return false regardless of whether the `allowBlank` option is set to `true` since it would be contradictory for a PresenceValidator to allow blank values.
+     @param {Object} object
+      The object which contains the attribute that has to be validated
+     @param {String} attribute
+      The attribute path on which the validation should be done
+     @param {Object} value
+      The value of the attribute
+  */
+  shouldSkipValidations: function(obj, attr, value) {
+    return false;
+  },
 
-  /** @private */
   _validate: function(obj, attr, value) {
-    var options = get(this, 'options'),
-        errors = get(obj, 'validationErrors'),
-        length = value ? Ember.get(value, 'length') : 0,
-        optionValue;
-
-    optionValue = this.optionValue(obj, 'is', 'number');
-    if (optionValue === null) {
-      optionValue = this.optionValue(obj, 'value', 'number');
+    var invalidValues = Ember.A([undefined, null);
+    if (invalidValues.contains(value) || (value.match && value.match(/^\s*$/))) {
+      obj.get('validationErrors').add(attr, "blank");
+      return;
     }
 
-    if (optionValue !== null) {
-      if (length !== optionValue) {
-        errors.add(attr, 'wrongLength', {value: optionValue});
-      }
-    } else {
-
-      optionValue = this.optionValue(obj, 'minimum', 'number');
-      if (optionValue !== null && length < optionValue) {
-        errors.add(attr, 'tooShortLength', {value: optionValue});
-      }
-
-      optionValue = this.optionValue(obj, 'maximum', 'number');
-      if (optionValue !== null && length > optionValue) {
-        errors.add(attr, 'tooLongLength', {value: optionValue});
-      }
+    if (Em.isArray(value) && Em.isEmpty(value)) {
+    	obj.get('validationErrors').add(attr, "blank");
+    	return;
     }
   }
-
 });
 
 })();
-
-
-
 (function() {
-var get = Ember.get;
-
-Ember.ValidationError.addMessages({
-  'invalid': "is invalid"
-});
-
-
-/**
-   @class
-
-   Validates whether the attribute has (not) the supplied regexp.
-
-   Options:
-
-    - `with` - The value must match this pattern
-    - `without` - The value must not match this pattern
-
-    The simplest way to use the `FormatValidator` is to set the validation to a `String`, or
-    a `RegExp`:
-
-        validations: {
-          email: {
-            format: /.+@.+\..{2,4}/
-          }
-        }
-
-
-   @extends Ember.Validator
- */
-Ember.Validators.FormatValidator = Ember.Validator.extend({
-  _validate: function(obj, attr, value) {
-    var options = get(this, 'options'),
-        errors = get(obj, 'validationErrors'),
-        optionValue;
-
-    if (!value || typeof value.match !== 'function') {
-      value = "";
-    }
-
-    optionValue = this.optionValue(obj, 'with') || this.optionValue(obj, 'value');
-    if ((typeof optionValue === 'string' || optionValue instanceof RegExp) && !value.match(optionValue)) {
-      errors.add(attr, 'invalid');
-    }
-
-    optionValue = this.optionValue(obj, 'without');
-    if ((typeof optionValue === 'string' || optionValue instanceof RegExp) && value.match(optionValue)) {
-      errors.add(attr, 'invalid');
-    }
-  }
-
-});
-
-})();
-
-
-
-(function() {
-var get = Ember.get;
-
-Ember.ValidationError.addMessages({
-  'match': "fields do not match"
-});
-
-/**
-   @class
-
-   Validates whether the property matches the other specified property.
-
-   Options:
-
-    - `property` - The other property to validate against
-
-    When passing a property as option to the validation, it will use it as the `property` option:
-
-        validations: {
-          password: {
-            property: 'confirmPassword'
-          }
-        }
-
-   @extends Ember.Validator
- */
-Ember.Validators.MatchValidator = Ember.Validator.extend({
-    /** @private */
-    _validate: function( obj, attr, value ) {
-      var options = get(this, 'options' ) || {};
-
-      if( options.property ) {
-        if( obj.get( options.property ) !==  value ) {
-          obj.get( 'validationErrors' ).add( attr, 'match' );
-        }
-      }
-    }
-
-});
-
-})();
-
-
-
-(function() {
-
 Ember.Validators.ReqwhenValidator = Ember.Validator.extend({
 	shouldSkipValidations: function(obj, attr, value) {
 	    return false;
@@ -1074,119 +1134,3 @@ Ember.Validators.ReqwhenValidator = Ember.Validator.extend({
 	}
 });
 })();
-
-
-
-(function() {
-Ember.Validators.NameValidator = Ember.Validator.extend({
-
-	_validate: function(obj, attr, value) {
-		if (/[^a-z^ ^' ^_^\-]/i.test(value)) {
-			obj.get('validationErrors').add(attr, 'invalid', '', '');
-		}
-	}
-});
-})();
-
-
-
-(function() {
-Ember.ValidationError.addMessage('alnum', "can only be alphanumeric");
-
-Ember.Validators.AlnumValidator = Ember.Validator.extend({
-
-    _validate: function (obj, attr, value) {
-
-        var pattern = /[A-Za-z0-9]+/;
-        var err = validate({val: value}, {val: {format: pattern}});
-        if (err != undefined) {
-            obj.get('validationErrors').add(attr, "alnum");
-        }
-    }
-});
-})();
-
-
-
-(function() {
-Ember.ValidationError.addMessage('date', "must be a valid date");
-
-Ember.Validators.DateValidator = Ember.Validator.extend({
-    _validate: function (obj, attr, value) {
-
-        var err = validate({val: value}, {val: {
-            datetime: {
-                dateOnly: true
-            }
-        }});
-
-        if (err != undefined) {
-            obj.get('validationErrors').add(attr, "date", '', obj.get('validations.' + attr + '.date.message'));
-        }
-    }
-});
-
-
-
-})();
-
-
-
-(function() {
-Ember.ValidationError.addMessage('email', "must be a valid email");
-
-Ember.Validators.EmailValidator = Ember.Validator.extend({
-    _validate: function (obj, attr, value) {
-        if (!Em.isBlank(value)) {
-            value = value.toLowerCase();
-            var errors = validate({val: value}, { val: { email: true }});
-            if (errors) {
-                obj.get('validationErrors').add(attr, "email", '', obj.get('validations.' + attr + '.email.message'));
-            }
-        }   
-    }
-});
-
-})();
-
-
-
-(function() {
-Ember.ValidationError.addMessage('numeric', "only accepts numeric values");
-
-Ember.Validators.NumericValidator = Ember.Validator.extend({
-    shouldSkipValidations: function (obj, attr, value) {
-        return false;
-    },
-
-    _validate: function (obj, attr, value) {
-
-        error = validate({val: value}, {val: {numericality: true}});
-
-        if (error != undefined) {
-            obj.get('validationErrors').add(attr, "numeric");
-        }
-    }
-});
-})();
-
-
-
-(function() {
-Ember.ValidationError.addMessage('numfloat', "can only be float");
-
-Ember.Validators.NumfloatValidator = Ember.Validator.extend({
-    _validate: function (obj, attr, value) {
-        if (isNaN(value)) {
-            obj.get('validationErrors').add(attr, "numfloat", '', obj.get('validations.' + attr + '.float.message'));
-        }
-    }
-});
-})();
-
-
-
-(function() {
-
-})();
-
