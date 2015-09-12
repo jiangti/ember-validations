@@ -498,11 +498,6 @@ Ember.Validations = Ember.Mixin.create(/**@scope Ember.Validations.prototype */{
     return get(this, 'validationErrors.length') === 0;
   }).property('validationErrors.length'),
 
-  clear: function() {
-        Ember.Logger.error('This function is deprecated, please use clearErrors instead.');
-        this.clearErrors();
-  },
-
   clearErrors: function() {
         var validations = get(this, 'validations'),
             errors = get(this, 'validationErrors');
