@@ -39,7 +39,7 @@ Ember.ValidationError.addMessages({
  */
 Ember.Validators.LengthValidator = Ember.Validator.extend( /** @scope Ember.Validators.LengthValidator */ {
 	shouldSkipValidations: function(obj, attr, value) {
-		if (Em.isEmpty(value)) {
+		if (Em.isEmpty(value) && !value) {
 			return true;
 		} else {
 			return false;
