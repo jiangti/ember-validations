@@ -1,4 +1,4 @@
-Ember.ValidationError.addMessage('blank', "can't be blank");
+Ember.ValidationError.addMessage('blank', "Required");
 
 /**
    @class

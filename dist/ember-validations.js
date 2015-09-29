@@ -717,13 +717,9 @@ Ember.ValidationError.addMessage('date', "must be a valid date");
 Ember.Validators.DateValidator = Ember.Validator.extend({
     _validate: function (obj, attr, value) {
 
-        var err = validate({val: value}, {val: {
-            datetime: {
-                dateOnly: true
-            }
-        }});
+        var ok = moment(value, "DD-MM-YYYY").isValid();
 
-        if (err != undefined) {
+        if (!ok) {
             obj.get('validationErrors').add(attr, "date", '', obj.get('validations.' + attr + '.date.message'));
         }
     }
@@ -1062,7 +1058,7 @@ Ember.Validators.NumfloatValidator = Ember.Validator.extend({
 });
 })();
 (function() {
-Ember.ValidationError.addMessage('blank', "can't be blank");
+Ember.ValidationError.addMessage('blank', "Required");
 
 /**
    @class
