@@ -4,8 +4,8 @@ Ember.ValidationError.addMessage('bday', "must be at least @{value} years old");
 Ember.Validators.DateValidator = Ember.Validator.extend({
     _validate: function (obj, attr, value) {
 
-    	var options = get(this, 'options'),
-			errors = get(obj, 'validationErrors'),
+    	var options = Em.get(this, 'options'),
+			errors = Em.get(obj, 'validationErrors'),
 			length = value ? Ember.get(upcast.to(value, 'string'), 'length') : 0,
 			optionValue;
 
@@ -17,12 +17,12 @@ Ember.Validators.DateValidator = Ember.Validator.extend({
             obj.get('validationErrors').add(attr, "date", '', obj.get('validations.' + attr + '.date.message'));
         } else {
 
-        	optionValue = this.optionValue(obj, 'age', 'number');
+        	optionValue = this.optionValue(obj, 'dob', 'number');
 
 			if (optionValue !== null) {
 				var n = moment().subtract(optionValue, 'years');
 				if (m.isAfter(n ,'day')) {
-					obj.get('validationErrors').add(attr, "bday");
+					obj.get('validationErrors').add(attr, "bday", {value: optionValue});
 				}
 			} 
         }
