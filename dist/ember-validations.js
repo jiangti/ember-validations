@@ -1112,14 +1112,19 @@ Ember.Validators.PresenceValidator = Ember.Validator.extend({
   },
 
   _validate: function(obj, attr, value) {
+
+  	var options = Em.get(this, 'options') || {};
+
+	var msg = Em.getWithDefault(options, 'message', null);
+
     var invalidValues = Ember.A([undefined, null]);
     if (invalidValues.contains(value) || (value.match && value.match(/^\s*$/))) {
-      obj.get('validationErrors').add(attr, "blank");
+      obj.get('validationErrors').add(attr, "blank", "", msg);
       return;
     }
 
     if (Em.isArray(value) && Em.isEmpty(value)) {
-    	obj.get('validationErrors').add(attr, "blank");
+    	obj.get('validationErrors').add(attr, "blank", "", msg);
     	return;
     }
   }
