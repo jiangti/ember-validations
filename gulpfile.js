@@ -4,7 +4,7 @@ var rename = require("gulp-rename");
 var wrap = require("gulp-wrap");
 
  
-gulp.task('dist', function(){
+gulp.task('default', function(){
   gulp.src([
   	'packages/ember-validations/lib/error.js',
   	'packages/ember-validations/lib/errors.js',

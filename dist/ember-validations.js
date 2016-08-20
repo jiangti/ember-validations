@@ -1138,12 +1138,12 @@ Ember.Validators.PresenceValidator = Ember.Validator.extend({
 (function() {
 Ember.Validators.ReqtrueValidator = Ember.Validator.extend({
 	shouldSkipValidations: function(obj, attr, value) {
-	    return false;
+		return false;
 	},
 
 	_validate: function(obj, attr, value) {
 		var options = Em.get(this, 'options') || {};
-		
+
 		if (Em.isArray(options.property)) {
 			//If all array is true;
 			//
@@ -1156,16 +1156,14 @@ Ember.Validators.ReqtrueValidator = Ember.Validator.extend({
 					obj.get('validationErrors').add(attr, 'blank');
 				}
 			}
-			
+
 		} else {
 			if (options.property) {
-				if (value !== true) {
+				if (obj.get(options.property) && value !== true) {
 					obj.get('validationErrors').add(attr, 'blank');
 				}
 			}
 		}
-
-			
 	}
 });
 })();
