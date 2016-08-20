@@ -424,90 +424,94 @@ var get = Ember.get, set = Ember.set;
 
    @extends Ember.Mixin
  */
-Ember.Validations = Ember.Mixin.create(/**@scope Ember.Validations.prototype */{
+Ember.Validations = Ember.Mixin.create( /**@scope Ember.Validations.prototype */ {
 
-  /** @private */
-  init: function() {
-    this._super();
-    if (get(this, 'validationErrors') === undefined) {
-      set(this, 'validationErrors', Ember.ValidationErrors.create());
-    }
-  },
+	/** @private */
+	init: function() {
+		this._super();
+		if (get(this, 'validationErrors') === undefined) {
+			set(this, 'validationErrors', Ember.ValidationErrors.create());
+		}
+	},
 
-  /**
+	/**
      Method used to verify that the object is valid, according to the `validations`
      hash.
 
      @returns {Boolean} true if the object if valid
   */
-  validate: function() {
-    var validations = get(this, 'validations'),
-        errors = get(this, 'validationErrors');
+	validate: function() {
+		var validations = get(this, 'validations'),
+			errors = get(this, 'validationErrors');
 
-    this.propertyWillChange('validationErrors');
+		this.propertyWillChange('validationErrors');
 
-    errors.clear();
+		errors.clear();
 
-    for (var attribute in validations) {
-      if (!validations.hasOwnProperty(attribute)) continue;
-      this._validateProperty(attribute);
-    }
+		for (var attribute in validations) {
+			if (!validations.hasOwnProperty(attribute)) continue;
+			this._validateProperty(attribute);
+		}
 
-    this.propertyDidChange('validationErrors');
-    return get(this, 'isValid');
-  },
+		this.propertyDidChange('validationErrors');
+		return get(this, 'isValid');
+	},
 
-  /**
+	/**
      Method used to verify that a property is valid, according to the `validations`
      hash.
 
      @returns {Boolean} true if the property is valid
    */
-  validateProperty: function(attribute) {
-    this.propertyWillChange('validationErrors');
-    var isValid = this._validateProperty(attribute);
-    this.propertyDidChange('validationErrors');
-    return isValid;
-  },
+	validateProperty: function(attribute) {
+		this.propertyWillChange('validationErrors');
+		var isValid = this._validateProperty(attribute);
+		this.propertyDidChange('validationErrors');
+		return isValid;
+	},
 
-  /** @private */
-  _validateProperty: function(attribute) {
-    var validations = get(this, 'validations'),
-        errors = get(this, 'validationErrors');
+	/** @private */
+	_validateProperty: function(attribute) {
+		var validations = get(this, 'validations'),
+			errors = get(this, 'validationErrors');
 
-    errors.remove(attribute);
+		errors.remove(attribute);
 
-    var attributeValidations = validations[attribute];
-    for (var validationName in attributeValidations) {
-      if (!attributeValidations.hasOwnProperty(validationName)) continue;
+		var checkWhen = Em.get(validations, 'checkWhen');
 
-      var options = attributeValidations[validationName];
-      var validator = Ember.Validators.getValidator(validationName, options);
-      validator.validate(this, attribute, this.get(attribute));
-    }
+		if ((checkWhen && this.get('checkWhen')) || Em.isEmpty(checkWhen)) {
+			var attributeValidations = validations[attribute];
+			for (var validationName in attributeValidations) {
+				if (!attributeValidations.hasOwnProperty(validationName)) continue;
 
-    var isValid = !get(this, 'validationErrors.' + attribute + '.length');
-    return isValid;
-  },
+				var options = attributeValidations[validationName];
+				var validator = Ember.Validators.getValidator(validationName, options);
+				validator.validate(this, attribute, this.get(attribute));
+			}
+		}
 
-  /**
+		var isValid = !get(this, 'validationErrors.' + attribute + '.length');
+		return isValid;
+	},
+
+	/**
      Property updated when calling `validate()` or `validateProperty()`.
      True when the object is valid.
    */
-  isValid: Ember.computed(function() {
-    return get(this, 'validationErrors.length') === 0;
-  }).property('validationErrors.length'),
+	isValid: Ember.computed(function() {
+		return get(this, 'validationErrors.length') === 0;
+	}).property('validationErrors.length'),
 
-  clearErrors: function() {
-        var validations = get(this, 'validations'),
-            errors = get(this, 'validationErrors');
+	clearErrors: function() {
+		var validations = get(this, 'validations'),
+			errors = get(this, 'validationErrors');
 
-        this.propertyWillChange('validationErrors');
+		this.propertyWillChange('validationErrors');
 
-        errors.clear();
+		errors.clear();
 
-        this.propertyDidChange('validationErrors');
-  }
+		this.propertyDidChange('validationErrors');
+	}
 });
 })();
 (function() {
