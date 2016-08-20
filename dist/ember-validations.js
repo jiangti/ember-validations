@@ -477,18 +477,23 @@ Ember.Validations = Ember.Mixin.create( /**@scope Ember.Validations.prototype */
 
 		errors.remove(attribute);
 
-		var checkWhen = Em.get(validations, 'checkWhen');
-
-		if ((checkWhen && this.get('checkWhen')) || Em.isEmpty(checkWhen)) {
-			var attributeValidations = validations[attribute];
-			for (var validationName in attributeValidations) {
-				if (!attributeValidations.hasOwnProperty(validationName)) continue;
-
-				var options = attributeValidations[validationName];
-				var validator = Ember.Validators.getValidator(validationName, options);
-				validator.validate(this, attribute, this.get(attribute));
+		var attributeValidations = validations[attribute];
+		for (var validationName in attributeValidations) {
+			if (validationName == 'checkWhen') {
+				if (!this.get(attributeValidations.checkWhen)) {
+					break;
+				}
+				continue;
 			}
+			if (!attributeValidations.hasOwnProperty(validationName)) continue;
+
+			var options = attributeValidations[validationName];
+			var validator = Ember.Validators.getValidator(validationName, options);
+
+
+			validator.validate(this, attribute, this.get(attribute));
 		}
+	
 
 		var isValid = !get(this, 'validationErrors.' + attribute + '.length');
 		return isValid;
