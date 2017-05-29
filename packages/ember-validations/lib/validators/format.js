@@ -37,14 +37,24 @@ Ember.Validators.FormatValidator = Ember.Validator.extend({
       value = "";
     }
 
+    var msg = this.optionValue(obj, 'msg');
+
     optionValue = this.optionValue(obj, 'with') || this.optionValue(obj, 'value');
     if ((typeof optionValue === 'string' || optionValue instanceof RegExp) && !value.match(optionValue)) {
-      errors.add(attr, 'invalid');
+      if (msg) {
+      	errors.add(attr, 'invalid', '', msg);
+      } else {
+      	errors.add(attr, 'invalid');
+      }
     }
 
     optionValue = this.optionValue(obj, 'without');
     if ((typeof optionValue === 'string' || optionValue instanceof RegExp) && value.match(optionValue)) {
-      errors.add(attr, 'invalid');
+      if (msg) {
+      	errors.add(attr, 'invalid', '', msg);
+      } else {
+      	errors.add(attr, 'invalid');
+      }
     }
   }
 
