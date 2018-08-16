@@ -718,6 +718,8 @@ Ember.Validators.AlnumValidator = Ember.Validator.extend({
 (function() {
 Ember.ValidationError.addMessage('date', "must be a valid date");
 Ember.ValidationError.addMessage('bday', "must be at least @{value} years old");
+Ember.ValidationError.addMessage('cday', "must be younger than @{value} years old");
+
 
 Ember.Validators.DateValidator = Ember.Validator.extend({
     _validate: function (obj, attr, value) {
@@ -740,6 +742,13 @@ Ember.Validators.DateValidator = Ember.Validator.extend({
 			if (optionValue !== null) {
 				var n = moment().subtract(optionValue, 'years');
 				if (m.isAfter(n ,'day')) {
+					obj.get('validationErrors').add(attr, "bday", {value: optionValue});
+                }
+                
+
+                n = moment().subtract(120, 'years');
+
+                if (m.isBefore(n ,'day')) {
 					obj.get('validationErrors').add(attr, "bday", {value: optionValue});
 				}
 			} 
