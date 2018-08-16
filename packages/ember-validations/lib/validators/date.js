@@ -31,7 +31,7 @@ Ember.Validators.DateValidator = Ember.Validator.extend({
                 n = moment().subtract(120, 'years');
 
                 if (m.isBefore(n ,'day')) {
-					obj.get('validationErrors').add(attr, "cday", {value: optionValue});
+					obj.get('validationErrors').add(attr, "cday", {value: 120});
 				}
 			} 
         }
