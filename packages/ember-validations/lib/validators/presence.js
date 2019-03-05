@@ -31,7 +31,7 @@ Ember.Validators.PresenceValidator = Ember.Validator.extend({
 	var msg = Em.getWithDefault(options, 'message', null);
 
     var invalidValues = Ember.A([undefined, null]);
-    if (invalidValues.includes(value) || (value.match && value.match(/^\s*$/))) {
+    if (invalidValues.indexOf(value) > -1 || (value.match && value.match(/^\s*$/))) {
       obj.get('validationErrors').add(attr, "blank", "", msg);
       return;
     }
